@@ -2,6 +2,7 @@
 # Coupling using the displacement for MDCM
 # @author patrickdiehl@lsu.edu
 # @author serge.prudhomme@polymtl.ca
+# @author a30110572@mcla.edu
 # @date 02/05/2021
 import numpy as np
 import sys 
