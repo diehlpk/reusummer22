@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.ticker import FormatStrFormatter
 
-pgf_with_latex = {"text.usetex": True, "font.size" : 12, "pgf.preamble" : [r'\usepackage{xfrac}'] }
+# pgf_with_latex = {"text.usetex": True, "font.size" : 12, "pgf.preamble" : [r'\usepackage{xfrac}'] }
 
 
 example = sys.argv[1]
@@ -23,6 +23,7 @@ g = -1
 #############################################################################
 
 def solve(M,f):
+    
     return np.linalg.solve(M,f)
 
 #############################################################################
@@ -70,7 +71,7 @@ def forceCoupling(n,x):
     
     force = np.zeros(3*n+4)
    
-    for i in range(1,3*n+4):
+    for i in range(1,3*n+3):
         force[i] = f(x[i])
     
     force[3*n+3] = g
@@ -181,6 +182,12 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
+# Define FPD
+# def fPD(n,h,i):
+    force=forceCoupling(n,h)
+    fPD = ((2*force[i])/h)/(h*h)
+    return fPD
+
 def Coupling(n,h):
 
     M = np.zeros([3*n+4,3*n+4])
@@ -213,11 +220,11 @@ def Coupling(n,h):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * fPD
-        M[i][i-1] = -4. * fPD
-        M[i][i] = 10. * fPD
-        M[i][i+1] =  -4. * fPD
-        M[i][i+2] = -1. * fPD
+        M[i][i-2] = -1.  * fPD # (n,h,i)
+        M[i][i-1] = -4. * fPD # (n,h,i)
+        M[i][i] = 10. * fPD # (n,h,i)
+        M[i][i+1] =  -4. * fPD # (n,h,i)
+        M[i][i+2] = -1. * fPD # (n,h,i)
 
     # Overlap
 
@@ -281,9 +288,9 @@ for i in range(4,8):
 
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
-
-    if example == "Quartic" or "Linear-cubic":
-
+    
+    if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
+        
         plt.plot(xFull,uSlice-uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
 
@@ -294,7 +301,7 @@ for i in range(4,8):
         plt.ylabel("Displacement")
         np.savetxt("coupling-"+example.lower()+"-approach-1.csv",uSlice)   
 
-plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%0.5f')) 
+# plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%0.5f')) 
 plt.title("Example with "+example.lower()+" solution for MDCM with $m=2$")
 plt.legend()
 plt.grid()
