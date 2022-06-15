@@ -156,12 +156,22 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-def Coupling(n,h):
+def fPD(x,h):
+    # print(x)
+    c = 0.9
+    E = 0
+    if x >=1 and x<=1.5:
+        E = -2*(1-c)*x+1+2*(1-c)
+    else:
+        E = -2*(-1+c)*x+1+4*(-1+c)
+    return E/(8*h*h)
+
+def Coupling(n,h,x):
 
     M = np.zeros([3*n+4,3*n+4])
 
     fFD =  1./(2.*h*h)
-    fPD =  1./(8.*h*h)
+    # fPD =  1./(8.*h*h)
 
     # Boundary
 
@@ -188,11 +198,11 @@ def Coupling(n,h):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * fPD
-        M[i][i-1] = -4. * fPD
-        M[i][i] = 10. * fPD
-        M[i][i+1] =  -4. * fPD
-        M[i][i+2] = -1. * fPD
+        M[i][i-2] = -1.  * fPD(x[i],h)
+        M[i][i-1] = -4. * fPD(x[i],h)
+        M[i][i] = 10. * fPD(x[i],h)
+        M[i][i+1] =  -4. * fPD(x[i],h)
+        M[i][i+2] = -1. * fPD(x[i],h)
 
     # Overlap
 
@@ -247,7 +257,7 @@ for i in range(4,8):
     forceCoupled[2*nodes+3] = 0
     forceCoupled[2*nodes+4] = 0
 
-    uFDMVHM = solve(Coupling(nodes,h),forceCoupled)
+    uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
     uFD = solve(FDM(nodesFull,h),forceFull(nodesFull,h))
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
