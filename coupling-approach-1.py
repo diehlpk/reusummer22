@@ -16,7 +16,8 @@ from matplotlib.ticker import FormatStrFormatter
 example = sys.argv[1]
 
 g = -1
-
+has_condition = True
+con = []
 
 #############################################################################
 # Solve the system
@@ -256,6 +257,9 @@ def Coupling(n,h,x):
     M[3*n+3][3*n+1] = 9 * h * fFD / 3
     M[3*n+3][3*n] = -2 * h * fFD / 3
 
+    if has_condition:
+        con.append(np.linalg.cond(M))
+
     return M
 
 
@@ -314,6 +318,8 @@ plt.legend()
 plt.grid()
 plt.xlabel("$x$")
 
-
 plt.savefig("coupling-"+example.lower()+"-approach-1.pdf",bbox_inches='tight')
+
+if has_condition :
+    np.savetxt("con_mdcm_d-cubic-matching.csv", con, delimiter=",")
 
