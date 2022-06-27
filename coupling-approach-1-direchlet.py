@@ -157,14 +157,13 @@ def CouplingFDFD(n,h):
 #############################################################################
 
 def fPD(x,h):
-    # print(x)
     c = 0.9
-    E = 0
-    if x >=1 and x<=1.5:
-        E = -2*(1-c)*x+1+2*(1-c)
-    else:
-        E = -2*(-1+c)*x+1+4*(-1+c)
-    return E/(8*h*h)
+    E = 1
+    if x >= 1.25 and x <= 1.5:
+        E = 1+4*(1-c)*(1.25-x)
+    elif x >= 1.5 and x <= 1.75:
+        E = 1+4*(1-c)*(x-1.75)
+    return E/(8.*h*h)
 
 def Coupling(n,h,x):
 
@@ -198,11 +197,11 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * fPD(x[i],h)
-        M[i][i-1] = -4. * fPD(x[i],h)
-        M[i][i] = 10. * fPD(x[i],h)
-        M[i][i+1] =  -4. * fPD(x[i],h)
-        M[i][i+2] = -1. * fPD(x[i],h)
+        M[i][i-2] = -1.  * fPD(x[i-2],h)
+        M[i][i-1] = -4. * fPD(x[i-1],h)
+        M[i][i] = 10. * (fPD(x[i-2],h)/4 + fPD(x[i-1],h) + fPD(x[i+1],h) + fPD(x[i+2],h)/4)
+        M[i][i+1] =  -4. * fPD(x[i+1],h)
+        M[i][i+2] = -1. * fPD(x[i+2],h)
 
     # Overlap
 

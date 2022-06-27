@@ -39,17 +39,17 @@ def f(x):
         return -6*x
     elif example == "Quartic":
         g = 108
-        return -12 * x*x
+        return -12 *x*x
     elif example == "Quadratic":
         g = 6
         return -2
     elif example == "Linear":
         g = 1
-        return 0
+        return 0.1
     elif example == "Linear-cubic":
         g = 31./4.
         if x < 1.5:
-            return 0 
+            return 0.1
         else:
             return 9-6*x
     else:
@@ -183,14 +183,13 @@ def CouplingFDFD(n,h):
 #############################################################################
 
 def fPD(x,h):
-    print(x)
     c = 0.9
-    E = 0
-    if x >=1 and x<=1.5:
-        E = -2*(1-c)*x+1+2*(1-c)
-    else:
-        E = -2*(-1+c)*x+1+4*(-1+c)
-    return E/(8*h*h)
+    E = 1
+    if x >= 1.25 and x <= 1.5:
+        E = 1+4*(1-c)*(1.25-x)
+    elif x >= 1.5 and x <= 1.75:
+        E = 1+4*(1-c)*(x-1.75)
+    return E/(8.*h*h)
     
 
 def Coupling(n,h,x):
@@ -225,12 +224,12 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * fPD(x[i],h)
-        M[i][i-1] = -4. * fPD(x[i],h)
-        M[i][i] = 10. * fPD(x[i],h)
-        M[i][i+1] =  -4. * fPD(x[i],h)
-        M[i][i+2] = -1. * fPD(x[i],h)
-        print(fPD(x[i],h))
+        M[i][i-2] = -1.  * fPD(x[i-2],h)
+        M[i][i-1] = -4. * fPD(x[i-1],h)
+        M[i][i] = 10. * (fPD(x[i-2],h)/4 + fPD(x[i-1],h) + fPD(x[i+1],h) + fPD(x[i+2],h)/4)
+        M[i][i+1] =  -4. * fPD(x[i+1],h)
+        M[i][i+2] = -1. * fPD(x[i+2],h)
+        # print(fPD(x[i],h))
 
     # Overlap
 
@@ -262,7 +261,7 @@ def Coupling(n,h,x):
 
 markers = ['s','o','x','.']
 
-for i in range(4,8):
+for i in range(8,10):
     n = np.power(2,i)
     h = 1./n
     nodes = n + 1
@@ -297,8 +296,8 @@ for i in range(4,8):
     
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
         
-        plt.plot(xFull,uSlice-uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
-        # plt.plot(xFull,uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=n)
+        plt.plot(xFull,uSlice-uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-8],markevery=n)
+        # plt.plot(xFull,uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
         plt.ylabel("Error in displacement w.r.t. FDM")
 
