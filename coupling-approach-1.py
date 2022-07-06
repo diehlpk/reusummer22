@@ -79,6 +79,17 @@ def forceCoupling(n,x):
     
     return force
 
+def forceCouplingFD(n,x):
+    
+    force = np.zeros(3*n+3)
+   
+    for i in range(1,3*n+2):
+        force[i] = f(x[i])
+    
+    force[3*n+2] = g
+    print(len(force))
+    return force
+
 #############################################################################
 # Exact solution 
 #############################################################################
@@ -151,9 +162,9 @@ def CouplingFDFD(n,h):
     M[n][n+2] = 1*h
 
     for i in range(n+1,2*n-1):
-        M[i][i-1] = -2
-        M[i][i] = 4
-        M[i][i+1] = -2
+        M[i][i-1] = -1 * (((fPD(x[i],h)) + (fPD(x[i-1],h)))/2)
+        M[i][i] = 1 * (2 * (fPD(x[i],h)))
+        M[i][i+1] = -1 * (((fPD(x[i],h)) + (fPD(x[i+1],h)))/2)
 
     M[2*n-1][2*n-1] = -1 
     M[2*n-1][2*n] = 1
@@ -183,14 +194,15 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
+c = 0.5
+
 def fPD(x,h):
-    c = 0.9
     E = 1
     if x >= 1.25 and x <= 1.5:
         E = 1+4*(1-c)*(1.25-x)
     elif x >= 1.5 and x <= 1.75:
         E = 1+4*(1-c)*(x-1.75)
-    return E/(8.*h*h)
+    return E/(h*h)
     
 
 def Coupling(n,h,x):
@@ -225,12 +237,11 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * fPD(x[i-2],h)
-        M[i][i-1] = -4. * fPD(x[i-1],h)
-        M[i][i] = 10. * (fPD(x[i-2],h)/4 + fPD(x[i-1],h) + fPD(x[i+1],h) + fPD(x[i+2],h)/4)
-        M[i][i+1] =  -4. * fPD(x[i+1],h)
-        M[i][i+2] = -1. * fPD(x[i+2],h)
-        # print(fPD(x[i],h))
+        M[i][i-2] = 1.  * (fPD(x[i-2],h)/4)
+        M[i][i-1] = 1. * (fPD(x[i-1],h))
+        M[i][i] = -1 * (fPD(x[i-2],h)/4 + (fPD(x[i-1],h)) + (fPD(x[i+1],h)) + fPD(x[i+2],h)/4)
+        M[i][i+1] =  1. * (fPD(x[i+1],h))
+        M[i][i+2] = 1. * (fPD(x[i+2],h)/4)
 
     # Overlap
 
@@ -265,7 +276,7 @@ def Coupling(n,h,x):
 
 markers = ['s','o','x','.']
 
-for i in range(8,10):
+for i in range(4,8):
     n = np.power(2,i)
     h = 1./n
     nodes = n + 1
@@ -276,8 +287,14 @@ for i in range(8,10):
     x2 = np.linspace(1-2*h,2+2*h,nodes+4)
     x3 = np.linspace(2,3.,nodes)
     x = np.array(np.concatenate((x1,x2,x3)))
+    x1FD = np.linspace(0,1,nodes)
+    x2FD = np.linspace(1,2,nodes)
+    x3FD = np.linspace(2,3.,nodes)
+    xFD = np.array(np.concatenate((x1FD,x2FD,x3FD)))
+    print(xFD)
 
     xFull = np.linspace(0,3.,nodesFull)
+    
 
   
     forceCoupled = forceCoupling(nodes,x)
@@ -290,18 +307,25 @@ for i in range(8,10):
     forceCoupled[2*nodes+3] = 0
     forceCoupled[2*nodes+4] = 0
 
+    forceCoupledFD = forceCouplingFD(n,xFD)
+
+    forceCoupledFD[n] = 0
+    forceCoupledFD[2*n+1] = 0
+
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
-    uFD = solve(FDM(nodesFull,h),forceFull(nodesFull,h))
+    uFD = solve(CouplingFDFD(nodes,h),forceCoupledFD)
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
+    uSliceFD = np.array(np.concatenate((uFD[0:nodes],uFD[nodes+1:2*nodes],uFD[2*nodes+1:len(x)])))
+    
 
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
     
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
         
-        plt.plot(xFull,uSlice-uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-8],markevery=n)
-        # plt.plot(xFull,uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
+        plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
+        plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
         plt.ylabel("Error in displacement w.r.t. FDM")
 
@@ -321,5 +345,7 @@ plt.xlabel("$x$")
 plt.savefig("coupling-"+example.lower()+"-approach-1.pdf",bbox_inches='tight')
 
 if has_condition :
-    np.savetxt("con_mdcm_d-cubic-matching.csv", con, delimiter=",")
+    file = "con_mdcm_d-cubic-matching.csv" # + str(c) + ".csv"
+    # print(file)
+    np.savetxt(file, con, delimiter=",")
 

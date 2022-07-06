@@ -14,7 +14,8 @@ pgf_with_latex = {"text.usetex": True, "font.size" : 12, "pgf.preamble" : [r'\us
 
 example = sys.argv[1]
 
-
+has_condition = True
+con = []
 #############################################################################
 # Solve the system
 #############################################################################
@@ -156,14 +157,15 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
+c = 0.00001
+
 def fPD(x,h):
-    c = 0.9
     E = 1
     if x >= 1.25 and x <= 1.5:
         E = 1+4*(1-c)*(1.25-x)
     elif x >= 1.5 and x <= 1.75:
         E = 1+4*(1-c)*(x-1.75)
-    return E/(8.*h*h)
+    return E/(h*h)
 
 def Coupling(n,h,x):
 
@@ -197,11 +199,11 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * fPD(x[i-2],h)
-        M[i][i-1] = -4. * fPD(x[i-1],h)
-        M[i][i] = 10. * (fPD(x[i-2],h)/4 + fPD(x[i-1],h) + fPD(x[i+1],h) + fPD(x[i+2],h)/4)
-        M[i][i+1] =  -4. * fPD(x[i+1],h)
-        M[i][i+2] = -1. * fPD(x[i+2],h)
+        M[i][i-2] = 1.  * (fPD(x[i-2],h)/4)
+        M[i][i-1] = 1. * (fPD(x[i-1],h))
+        M[i][i] = -1 * (fPD(x[i-2],h)/4 + (fPD(x[i-1],h)) + (fPD(x[i+1],h)) + fPD(x[i+2],h)/4)
+        M[i][i+1] =  1. * (fPD(x[i+1],h))
+        M[i][i+2] = 1. * (fPD(x[i+2],h)/4)
 
     # Overlap
 
@@ -264,9 +266,10 @@ for i in range(4,8):
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
 
-    if example == "Quartic" :
+    if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
 
-        plt.plot(xFull,uSlice-uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=level[i-4])
+        plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=level[i-4])
+        plt.plot(xFull,uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
         plt.ylabel("Error in displacement w.r.t. FDM")
 
     elif i == 4:
@@ -285,3 +288,7 @@ plt.xlabel("$x$")
 
 plt.savefig("coupling-"+example.lower()+"-approach-1-direchlet.pdf",bbox_inches='tight')
 
+if has_condition :
+    file = "con_mdcm_d-cubic-matching_" + str(c) + ".csv"
+    print(file)
+    np.savetxt(file, con, delimiter=",")
