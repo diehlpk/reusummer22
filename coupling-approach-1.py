@@ -87,7 +87,7 @@ def forceCouplingFD(n,x):
         force[i] = f(x[i])
     
     force[3*n+2] = g
-    print(len(force))
+    
     return force
 
 #############################################################################
@@ -291,7 +291,6 @@ for i in range(4,8):
     x2FD = np.linspace(1,2,nodes)
     x3FD = np.linspace(2,3.,nodes)
     xFD = np.array(np.concatenate((x1FD,x2FD,x3FD)))
-    print(xFD)
 
     xFull = np.linspace(0,3.,nodesFull)
     

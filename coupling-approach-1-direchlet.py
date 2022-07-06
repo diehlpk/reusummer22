@@ -61,6 +61,17 @@ def forceCoupling(n,x):
     
     return force
 
+def forceCouplingFD(n,x):
+    
+    force = np.zeros(3*n+3)
+   
+    for i in range(1,3*n+2):
+        force[i] = f(x[i])
+    
+    force[3*n+2] = 0
+    
+    return force
+
 #############################################################################
 # Exact solution 
 #############################################################################
@@ -125,9 +136,9 @@ def CouplingFDFD(n,h):
     M[n][n+2] = 1*h
 
     for i in range(n+1,2*n-1):
-        M[i][i-1] = -2
-        M[i][i] = 4
-        M[i][i+1] = -2
+        M[i][i-1] = -1 * (((fPD(x[i],h)) + (fPD(x[i-1],h)))/2)
+        M[i][i] = 1 * (2 * (fPD(x[i],h)))
+        M[i][i+1] = -1 * (((fPD(x[i],h)) + (fPD(x[i+1],h)))/2)
 
     M[2*n-1][2*n-1] = -1 
     M[2*n-1][2*n] = 1
@@ -244,6 +255,10 @@ for i in range(4,8):
     x2 = np.linspace(1-2*h,2+2*h,nodes+4)
     x3 = np.linspace(2,3.,nodes)
     x = np.array(np.concatenate((x1,x2,x3)))
+    x1FD = np.linspace(0,1,nodes)
+    x2FD = np.linspace(1,2,nodes)
+    x3FD = np.linspace(2,3.,nodes)
+    xFD = np.array(np.concatenate((x1FD,x2FD,x3FD)))
 
     xFull = np.linspace(0,3.,nodesFull)
 
@@ -258,10 +273,16 @@ for i in range(4,8):
     forceCoupled[2*nodes+3] = 0
     forceCoupled[2*nodes+4] = 0
 
+    forceCoupledFD = forceCouplingFD(n,xFD)
+
+    forceCoupledFD[n] = 0
+    forceCoupledFD[2*n+1] = 0
+
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
-    uFD = solve(FDM(nodesFull,h),forceFull(nodesFull,h))
+    uFD = solve(CouplingFDFD(nodes,h),forceCoupledFD)
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
+    uSliceFD = np.array(np.concatenate((uFD[0:nodes],uFD[nodes+1:2*nodes],uFD[2*nodes+1:len(x)])))
 
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
@@ -269,7 +290,7 @@ for i in range(4,8):
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
 
         plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=level[i-4])
-        plt.plot(xFull,uFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
+        plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
         plt.ylabel("Error in displacement w.r.t. FDM")
 
     elif i == 4:
