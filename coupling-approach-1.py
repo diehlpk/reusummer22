@@ -139,7 +139,7 @@ def FDM(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - FDM - FDM
 #############################################################################
 
-def CouplingFDFD(n,h):
+def CouplingFDFD(n,h,x):
 
     M = np.zeros([3*n,3*n])
 
@@ -314,7 +314,7 @@ for i in range(4,8):
     forceCoupledFD[2*n+1] = 0
 
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
-    uFD = solve(CouplingFDFD(nodes,h),forceCoupledFD)
+    uFD = solve(CouplingFDFD(nodes,h,xFD),forceCoupledFD)
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
     uSliceFD = np.array(np.concatenate((uFD[0:nodes],uFD[nodes+1:2*nodes],uFD[2*nodes+1:len(x)])))
