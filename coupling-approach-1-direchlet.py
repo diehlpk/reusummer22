@@ -168,7 +168,7 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.00001
+c = 0.8
 
 def fPD(x,h):
     E = 1
@@ -280,6 +280,7 @@ for i in range(4,8):
 
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
     uFD = solve(CouplingFDFD(nodes,h),forceCoupledFD)
+    uFDFull = solve(FDM(nodesFull,h),forceFull(nodesFull,h))
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
     uSliceFD = np.array(np.concatenate((uFD[0:nodes],uFD[nodes+1:2*nodes],uFD[2*nodes+1:len(x)])))
@@ -292,6 +293,8 @@ for i in range(4,8):
         plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=level[i-4])
         plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
         plt.ylabel("Error in displacement w.r.t. FDM")
+
+        plt.plot(xFull,uFDFull,label=r"$\delta$=1/"+str(int(n/2))+"",c="blue",marker=markers[i-4],markevery=level[i-4])
 
     elif i == 4:
 
