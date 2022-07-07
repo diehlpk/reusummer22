@@ -143,23 +143,25 @@ def CouplingFDFD(n,h):
 
     M = np.zeros([3*n,3*n])
 
+    fFD = 1./(2.*h*h)
+
     M[0][0] = 1
 
     for i in range(1,n-1):
-        M[i][i-1] = -2
-        M[i][i] = 4
-        M[i][i+1] = -2
+        M[i][i-1] = -2 * fFD
+        M[i][i] = 4 * fFD
+        M[i][i+1] = -2 * fFD
 
     M[n-1][n-1] = -1 
     M[n-1][n] = 1 
 
-    M[n][n-1] = 3*h
-    M[n][n-2] = -4*h
-    M[n][n-3] = 1*h
+    M[n][n-1] = 3*h * fFD
+    M[n][n-2] = -4*h * fFD
+    M[n][n-3] = 1*h * fFD
 
-    M[n][n] = 3*h
-    M[n][n+1] = -4*h
-    M[n][n+2] = 1*h
+    M[n][n] = 3*h * fFD
+    M[n][n+1] = -4*h * fFD
+    M[n][n+2] = 1*h * fFD
 
     for i in range(n+1,2*n-1):
         M[i][i-1] = -1 * (((fPD(x[i],h)) + (fPD(x[i-1],h)))/2)
@@ -169,24 +171,24 @@ def CouplingFDFD(n,h):
     M[2*n-1][2*n-1] = -1 
     M[2*n-1][2*n] = 1
 
-    M[2*n][2*n-1] = 3*h
-    M[2*n][2*n-2] = -4*h
-    M[2*n][2*n-3] = h
+    M[2*n][2*n-1] = 3*h * fFD
+    M[2*n][2*n-2] = -4*h * fFD
+    M[2*n][2*n-3] = h * fFD
 
-    M[2*n][2*n] = 3*h
-    M[2*n][2*n+1] = -4*h
-    M[2*n][2*n+2] = h
+    M[2*n][2*n] = 3*h * fFD
+    M[2*n][2*n+1] = -4*h * fFD
+    M[2*n][2*n+2] = h * fFD
 
     for i in range(2*n+1,3*n-1):
-        M[i][i-1] = -2
-        M[i][i] = 4
-        M[i][i+1] = -2
+        M[i][i-1] = -2 * fFD
+        M[i][i] = 4 * fFD
+        M[i][i+1] = -2 * fFD
 
-    M[3*n-1][3*n-1] = 3*h
-    M[3*n-1][3*n-2] = -4*h
-    M[3*n-1][3*n-3] = h
+    M[3*n-1][3*n-1] = 3*h * fFD
+    M[3*n-1][3*n-2] = -4*h * fFD
+    M[3*n-1][3*n-3] = h * fFD
 
-    M *= 1./(2.*h*h)
+    #M *= 1./(2.*h*h)
     
     return M
 
