@@ -189,6 +189,8 @@ def CouplingFDFD(n,h,x):
     M[3*n-1][3*n-3] = h * fFD
 
     #M *= 1./(2.*h*h)
+
+    np.savetxt("foo.csv", M, delimiter=",")
     
     return M
 
@@ -310,7 +312,7 @@ for i in range(4,8):
 
     forceCoupledFD = forceCouplingFD(n,xFD)
 
-    forceCoupledFD[n] = 0
+    forceCoupledFD[nodes-1] = 0
     forceCoupledFD[2*n+1] = 0
 
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
