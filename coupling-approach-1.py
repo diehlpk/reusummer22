@@ -244,11 +244,11 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = 1.  * (fPD((x[i-2]+x[i])/2,h)/4) 
-        M[i][i-1] = 1. * (fPD((x[i-1]+x[i])/2,h)) 
-        M[i][i] = -1 * (fPD((x[i-2]+x[i])/2,h)/4 + (fPD((x[i-1]+x[i])/2,h)) + (fPD((x[i+1]+x[i])/2,h)) + fPD((x[i+2]+x[i])/2,h)/4) 
-        M[i][i+1] =  1. * (fPD((x[i+1]+x[i])/2,h)) 
-        M[i][i+2] = 1. * (fPD((x[i+2]+x[i])/2,h)/4) 
+        M[i][i-2] = 1.  * (fPD(x[i-2],h)/8) 
+        M[i][i-1] = 1. * (fPD(x[i-1],h)/2) 
+        M[i][i] = -1 * (fPD(x[i-2],h)/8 + fPD(x[i-1],h) / 2+ fPD(x[i+1],h) / 2 + fPD(x[i+2],h)/8) 
+        M[i][i+1] =  1. * (fPD(x[i+1],h)/2) 
+        M[i][i+2] = 1. * (fPD(x[i+2],h)/8) 
 
     # Overlap
 
