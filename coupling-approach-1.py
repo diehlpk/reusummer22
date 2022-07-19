@@ -4,6 +4,7 @@
 # @author serge.prudhomme@polymtl.ca
 # @author a30110572@mcla.edu
 # @date 02/05/2021
+from configparser import Interpolation
 import numpy as np
 import sys 
 import matplotlib.pyplot as plt
@@ -206,11 +207,16 @@ c = 0.9
 def fPD(x,h):
     E = 1
     if x >= 1.25 and x <= 1.5:
-        E = 1+4*(1-c)*(1.25-x)
+        #E = 1+4*(1-c)*(1.25-x)
+        E = ((1-c)*10)*(3.2*(x*x*x)-12*(x*x)+14.4*x)-(4.5*((1-c)*10)-(0.1*((1-c)*10)-1))
     elif x >= 1.5 and x <= 1.75:
-        E = 1+4*(1-c)*(x-1.75)
+        #E = 1+4*(1-c)*(x-1.75)
+        E = ((1-c)*10)*(-3.2*(x*x*x)+16.8*(x*x)-28.8*x)+(17.1*((1-c)*10)-(0.1*((1-c)*10)-1))
+    #print(x)
+    #print(E)
     return E/(h*h)
-    
+
+
 
 def Coupling(n,h,x):
 
@@ -400,7 +406,7 @@ for i in range(4,8):
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
         
         plt.plot(xFull,uSlice-uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
-        #plt.plot(xFull,uSlice-uVHM,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
+        #plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
         plt.ylabel("Error in displacement w.r.t. FDM")
 

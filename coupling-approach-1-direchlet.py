@@ -138,9 +138,11 @@ def CouplingFDFD(n,h):
     M[n][n+2] = 1*h * fFD
 
     for i in range(n+1,2*n-1):
-        M[i][i-1] = -1 * (((fPD(x[i],h)) + (fPD(x[i-1],h)))/2)
-        M[i][i] = 1 * (2 * (fPD(x[i],h)))
-        M[i][i+1] = -1 * (((fPD(x[i],h)) + (fPD(x[i+1],h)))/2)
+        left =  0.5 * (fPD(x[i-1],h)  + fPD(x[i],h)  ) 
+        right = 0.5 * (fPD(x[i],h)  + fPD(x[i+1],h) ) 
+        M[i][i-1] =  - left
+        M[i][i] =  (left + right)
+        M[i][i+1] = - right
 
     M[2*n-1][2*n-1] = -1 
     M[2*n-1][2*n] = 1
@@ -173,9 +175,13 @@ c = 0.8
 def fPD(x,h):
     E = 1
     if x >= 1.25 and x <= 1.5:
-        E = 1+4*(1-c)*(1.25-x)
+        #E = 1+4*(1-c)*(1.25-x)
+        E = ((1-c)*10)*(3.2*(x*x*x)-12*(x*x)+14.4*x)-(4.5*((1-c)*10)-(0.1*((1-c)*10)-1))
     elif x >= 1.5 and x <= 1.75:
-        E = 1+4*(1-c)*(x-1.75)
+        #E = 1+4*(1-c)*(x-1.75)
+        E = ((1-c)*10)*(-3.2*(x*x*x)+16.8*(x*x)-28.8*x)+(17.1*((1-c)*10)-(0.1*((1-c)*10)-1))
+    #print(x)
+    #print(E)
     return E/(h*h)
 
 def Coupling(n,h,x):
@@ -210,11 +216,11 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = 1.  * (fPD(x[i-2],h)/4)
-        M[i][i-1] = 1. * (fPD(x[i-1],h))
-        M[i][i] = -1 * (fPD(x[i-2],h)/4 + (fPD(x[i-1],h)) + (fPD(x[i+1],h)) + fPD(x[i+2],h)/4)
-        M[i][i+1] =  1. * (fPD(x[i+1],h))
-        M[i][i+2] = 1. * (fPD(x[i+2],h)/4)
+        M[i][i-2] = -1.  * (fPD(x[i-2],h)/8)
+        M[i][i-1] = -1. * (fPD(x[i-1],h)/2)
+        M[i][i] = 1 * (fPD(x[i-2],h)/8 + (fPD(x[i-1],h))/2 + (fPD(x[i+1],h))/2 + fPD(x[i+2],h)/8)
+        M[i][i+1] =  -1. * (fPD(x[i+1],h)/2)
+        M[i][i+2] = -1. * (fPD(x[i+2],h)/8)
 
     # Overlap
 
@@ -237,8 +243,58 @@ def Coupling(n,h,x):
     # Boundary
 
     M[3*n+3][3*n+3] = 1
-    
+    #M[3*n+3][3*n+3] = 11 *  h * fFD /3
+    #M[3*n+3][3*n+2] =  -18 * h * fFD /3  
+    #M[3*n+3][3*n+1] = 9 * h * fFD /3
+    #M[3*n+3][3*n] = -2 * h * fFD / 3
+
     return M
+
+def VHM(n,h,x):
+
+    f = 1./(8.*h*h) 
+    MVHM = np.zeros([n,n])
+
+    MVHM[0][0] = 1. * f
+    MVHM[1][0] = -8. * f
+    MVHM[1][1] = 16. * f
+    MVHM[1][2] = -8. * f
+
+    for i in range(2,n-2):
+
+        if x[i] < 1.25 :
+            MVHM[i][i-2] = -1. * f
+            MVHM[i][i-1] = -4. * f
+            MVHM[i][i] = 10. * f
+            MVHM[i][i+1] = -4. * f
+            MVHM[i][i+2] = -1. * f
+        elif x[i] > 1.25:
+            MVHM[i][i-2] = -1. * f
+            MVHM[i][i-1] = -4. * f
+            MVHM[i][i] = 10. * f
+            MVHM[i][i+1] = -4. * f
+            MVHM[i][i+2] = -1. * f
+        else:
+            MVHM[i][i-2] = -1.  * (fPD(x[i-2],h)/8) 
+            MVHM[i][i-1] = -1. * (fPD(x[i-1],h)/2) 
+            MVHM[i][i] = 1 * (fPD(x[i-2],h)/8 + fPD(x[i-1],h) / 2+ fPD(x[i+1],h) / 2 + fPD(x[i+2],h)/8) 
+            MVHM[i][i+1] =  -1. * (fPD(x[i+1],h)/2) 
+            MVHM[i][i+2] = -1. * (fPD(x[i+2],h)/8) 
+
+
+
+
+    MVHM[n-2][n-1] = -8. * f
+    MVHM[n-2][n-2] = 16. * f
+    MVHM[n-2][n-3] = -8. * f
+
+    MVHM[n-1][n-1] = 12.*h * f
+    MVHM[n-1][n-2] = -16.*h * f
+    MVHM[n-1][n-3] = 4.*h * f
+
+    #MVHM *= 1./(8.*h*h)
+    
+    return  MVHM
 
 
 markers = ['s','o','x','.']
@@ -275,8 +331,12 @@ for i in range(4,8):
 
     forceCoupledFD = forceCouplingFD(n,xFD)
 
-    forceCoupledFD[n] = 0
-    forceCoupledFD[2*n+1] = 0
+    #forceCoupledFD[n] = 0
+    #forceCoupledFD[2*n+1] = 0
+    forceCoupledFD[nodes-1] = 0
+    forceCoupledFD[nodes] = 0 
+    forceCoupledFD[2*nodes-1] = 0
+    forceCoupledFD[2*nodes] = 0
 
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
     uFD = solve(CouplingFDFD(nodes,h),forceCoupledFD)
@@ -284,6 +344,10 @@ for i in range(4,8):
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
     uSliceFD = np.array(np.concatenate((uFD[0:nodes],uFD[nodes+1:2*nodes],uFD[2*nodes+1:len(x)])))
+
+    uVHM = solve(VHM(nodesFull,h,xFull),forceFull(nodesFull,h))
+
+    print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
 
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
@@ -294,7 +358,7 @@ for i in range(4,8):
         plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
         plt.ylabel("Error in displacement w.r.t. FDM")
 
-        plt.plot(xFull,uFDFull,label=r"$\delta$=1/"+str(int(n/2))+"",c="blue",marker=markers[i-4],markevery=level[i-4])
+        #plt.plot(xFull,uFDFull,label=r"$\delta$=1/"+str(int(n/2))+"",c="blue",marker=markers[i-4],markevery=level[i-4])
 
     elif i == 4:
 
