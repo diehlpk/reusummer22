@@ -10,6 +10,7 @@ import sys
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.ticker import FormatStrFormatter
+from scipy import interpolate
 
 # pgf_with_latex = {"text.usetex": True, "font.size" : 12, "pgf.preamble" : [r'\usepackage{xfrac}'] }
 
@@ -203,15 +204,20 @@ def CouplingFDFD(n,h,x):
 #############################################################################
 
 c = 0.9
+x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
+y = [1,(1+c)/2,c,(1+c)/2,1]
+tck = interpolate.splrep(x, y, s=0)
 
 def fPD(x,h):
     E = 1
-    if x >= 1.25 and x <= 1.5:
+    if x >= 1.25 and x <= 1.75:
         #E = 1+4*(1-c)*(1.25-x)
-        E = ((1-c)*10)*(3.2*(x*x*x)-12*(x*x)+14.4*x)-(4.5*((1-c)*10)-(0.1*((1-c)*10)-1))
-    elif x >= 1.5 and x <= 1.75:
+        #E = ((1-c)*10)*(3.2*(x*x*x)-12*(x*x)+14.4*x)-(4.5*((1-c)*10)-(0.1*((1-c)*10)-1))
+        E = interpolate.splev(x, tck, der=0)
+    #elif x >= 1.5 and x <= 1.75:
         #E = 1+4*(1-c)*(x-1.75)
-        E = ((1-c)*10)*(-3.2*(x*x*x)+16.8*(x*x)-28.8*x)+(17.1*((1-c)*10)-(0.1*((1-c)*10)-1))
+        #E = ((1-c)*10)*(-3.2*(x*x*x)+16.8*(x*x)-28.8*x)+(17.1*((1-c)*10)-(0.1*((1-c)*10)-1))
+    #    E = interpolate.splev(x, tck, der=0) 
     #print(x)
     #print(E)
     return E/(h*h)
@@ -405,8 +411,8 @@ for i in range(4,8):
     
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
         
-        plt.plot(xFull,uSlice-uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
-        #plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
+        plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
+        plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
         plt.ylabel("Error in displacement w.r.t. FDM")
 
