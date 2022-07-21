@@ -203,7 +203,7 @@ def CouplingFDFD(n,h,x):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.9
+c = 0.5
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
@@ -411,8 +411,8 @@ for i in range(4,8):
     
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
         
-        plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
-        plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
+        plt.plot(xFull,uSlice-uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
+        #plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
         plt.ylabel("Error in displacement w.r.t. FDM")
 
