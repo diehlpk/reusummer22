@@ -171,7 +171,7 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.5
+c = 0.01
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)

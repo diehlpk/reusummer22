@@ -203,7 +203,7 @@ def CouplingFDFD(n,h,x):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.5
+c = 0.1
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
@@ -263,11 +263,11 @@ def Coupling(n,h,x):
     #print("----")
     for i in range(n+2,2*n+2):
         #print(x[i])
-        M[i][i-2] = -1.  * (fPD(x[i-2],h)/8) 
-        M[i][i-1] = -1. * (fPD(x[i-1],h)/2) 
-        M[i][i] = 1 * (fPD(x[i-2],h)/8 + fPD(x[i-1],h)/2+ fPD(x[i+1],h)/2  + fPD(x[i+2],h)/8) 
-        M[i][i+1] =  -1. * (fPD(x[i+1],h)/2) 
-        M[i][i+2] = -1. * (fPD(x[i+2],h)/8) 
+        M[i][i-2] = -1.  * (fPD(0.5*(x[i-2]+x[i]),h)/8) 
+        M[i][i-1] = -1. * (fPD(0.5*(x[i-1]+x[i]),h)/2) 
+        M[i][i] = 1 * (fPD(0.5*(x[i-2]+x[i]),h)/8 + fPD(0.5*(x[i-1]+x[i]),h)/2+ fPD(0.5*(x[i+1]+x[i]),h)/2  + fPD(0.5*(x[i+2]+x[i]),h)/8) 
+        M[i][i+1] =  -1. * (fPD(0.5*(x[i+1]+x[i]),h)/2) 
+        M[i][i+2] = -1. * (fPD(0.5*(x[i+2]+x[i]),h)/8) 
 
     # Overlap
 
