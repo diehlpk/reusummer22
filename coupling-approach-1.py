@@ -263,11 +263,11 @@ def Coupling(n,h,x):
     #print("----")
     for i in range(n+2,2*n+2):
         #print(x[i])
-        M[i][i-2] = -1.  * (fPD(0.5*(x[i-2]+x[i]),h)/8) 
-        M[i][i-1] = -1. * (fPD(0.5*(x[i-1]+x[i]),h)/2) 
-        M[i][i] = 1 * (fPD(0.5*(x[i-2]+x[i]),h)/8 + fPD(0.5*(x[i-1]+x[i]),h)/2+ fPD(0.5*(x[i+1]+x[i]),h)/2  + fPD(0.5*(x[i+2]+x[i]),h)/8) 
-        M[i][i+1] =  -1. * (fPD(0.5*(x[i+1]+x[i]),h)/2) 
-        M[i][i+2] = -1. * (fPD(0.5*(x[i+2]+x[i]),h)/8) 
+        M[i][i-2] = -1.  * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8) 
+        M[i][i-1] = -1. * (0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2) 
+        M[i][i] = 1 * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8+ 0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2+ 0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2  + 0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
+        M[i][i+1] =  -1. * (0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2) 
+        M[i][i+2] = -1. * (0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
 
     # Overlap
 

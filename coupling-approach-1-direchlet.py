@@ -171,7 +171,7 @@ def CouplingFDFD(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.01
+c = 0.5
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
@@ -179,14 +179,7 @@ tck = interpolate.splrep(x, y, s=0)
 def fPD(x,h):
     E = 1
     if x >= 1.25 and x <= 1.75:
-        #E = 1+4*(1-c)*(1.25-x)
-        #E = ((1-c)*10)*(3.2*(x*x*x)-12*(x*x)+14.4*x)-(4.5*((1-c)*10)-(0.1*((1-c)*10)-1))
         E = interpolate.splev(x, tck, der=0)
-    #elif x >= 1.5 and x <= 1.75:
-        #E = 1+4*(1-c)*(x-1.75)
-        #E = ((1-c)*10)*(-3.2*(x*x*x)+16.8*(x*x)-28.8*x)+(17.1*((1-c)*10)-(0.1*((1-c)*10)-1))
-    #    E = interpolate.splev(x, tck, der=0) 
-    #print(x)
     #print(E)
     return E/(h*h)
 
@@ -222,11 +215,11 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * (fPD(x[i-2],h)/8)
-        M[i][i-1] = -1. * (fPD(x[i-1],h)/2)
-        M[i][i] = 1 * (fPD(x[i-2],h)/8 + (fPD(x[i-1],h))/2 + (fPD(x[i+1],h))/2 + fPD(x[i+2],h)/8)
-        M[i][i+1] =  -1. * (fPD(x[i+1],h)/2)
-        M[i][i+2] = -1. * (fPD(x[i+2],h)/8)
+        M[i][i-2] = -1.  * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8) 
+        M[i][i-1] = -1. * (0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2) 
+        M[i][i] = 1 * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8+ 0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2+ 0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2  + 0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
+        M[i][i+1] =  -1. * (0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2) 
+        M[i][i+2] = -1. * (0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
 
     # Overlap
 
@@ -249,10 +242,6 @@ def Coupling(n,h,x):
     # Boundary
 
     M[3*n+3][3*n+3] = 1
-    #M[3*n+3][3*n+3] = 11 *  h * fFD /3
-    #M[3*n+3][3*n+2] =  -18 * h * fFD /3  
-    #M[3*n+3][3*n+1] = 9 * h * fFD /3
-    #M[3*n+3][3*n] = -2 * h * fFD / 3
 
     return M
 
@@ -287,18 +276,11 @@ def VHM(n,h,x):
             MVHM[i][i+1] =  -1. * (fPD(x[i+1],h)/2) 
             MVHM[i][i+2] = -1. * (fPD(x[i+2],h)/8) 
 
-
-
-
     MVHM[n-2][n-1] = -8. * f
     MVHM[n-2][n-2] = 16. * f
     MVHM[n-2][n-3] = -8. * f
 
-    MVHM[n-1][n-1] = 12.*h * f
-    MVHM[n-1][n-2] = -16.*h * f
-    MVHM[n-1][n-3] = 4.*h * f
-
-    #MVHM *= 1./(8.*h*h)
+    MVHM[n-1][n-1] = 1
     
     return  MVHM
 
@@ -360,8 +342,8 @@ for i in range(4,8):
 
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
 
-        plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=level[i-4])
-        plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
+        plt.plot(xFull,uSlice-uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=level[i-4])
+        #plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-4],markevery=level[i-4])
         plt.ylabel("Error in displacement w.r.t. FDM")
 
         #plt.plot(xFull,uFDFull,label=r"$\delta$=1/"+str(int(n/2))+"",c="blue",marker=markers[i-4],markevery=level[i-4])
