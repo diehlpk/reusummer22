@@ -38,14 +38,14 @@ def f(x):
     global g 
 
     if example == "Cubic":
-        g = 27
-        return -6*x
+        g = 1
+        return -2*x /9
     elif example == "Quartic":
-        g = 108
+        g = 1
         return -12 *x*x
     elif example == "Quadratic":
-        g = 6
-        return -2
+        g = 1
+        return -2/9
     elif example == "Linear":
         g = 1
         return 0.1
@@ -203,7 +203,7 @@ def CouplingFDFD(n,h,x):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.1
+c = 0.5
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
@@ -229,7 +229,7 @@ def Coupling(n,h,x):
     M = np.zeros([3*n+4,3*n+4])
 
     fFD =  1./(2.*h*h)
-    # fPD =  1./(8.*h*h)
+    f =  1./(8.*h*h)
 
     # Boundary
 
@@ -262,6 +262,18 @@ def Coupling(n,h,x):
     # PD
     #print("----")
     for i in range(n+2,2*n+2):
+        if x[i] < 1.25 :
+            M[i][i-2] = -1. * f
+            M[i][i-1] = -4. * f
+            M[i][i] = 10. * f
+            M[i][i+1] = -4. * f
+            M[i][i+2] = -1. * f
+        elif x[i] > 1.75:
+            M[i][i-2] = -1. * f
+            M[i][i-1] = -4. * f
+            M[i][i] = 10. * f
+            M[i][i+1] = -4. * f
+            M[i][i+2] = -1. * f
         #print(x[i])
         M[i][i-2] = -1.  * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8) 
         M[i][i-1] = -1. * (0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2) 
@@ -326,20 +338,18 @@ def VHM(n,h,x):
             MVHM[i][i] = 10. * f
             MVHM[i][i+1] = -4. * f
             MVHM[i][i+2] = -1. * f
-        elif x[i] > 1.25:
+        elif x[i] > 1.75:
             MVHM[i][i-2] = -1. * f
             MVHM[i][i-1] = -4. * f
             MVHM[i][i] = 10. * f
             MVHM[i][i+1] = -4. * f
             MVHM[i][i+2] = -1. * f
         else:
-            MVHM[i][i-2] = -1.  * (fPD(x[i-2],h)/8) 
-            MVHM[i][i-1] = -1. * (fPD(x[i-1],h)/2) 
-            MVHM[i][i] = 1 * (fPD(x[i-2],h)/8 + fPD(x[i-1],h) / 2+ fPD(x[i+1],h) / 2 + fPD(x[i+2],h)/8) 
-            MVHM[i][i+1] =  -1. * (fPD(x[i+1],h)/2) 
-            MVHM[i][i+2] = -1. * (fPD(x[i+2],h)/8) 
-
-
+            MVHM[i][i-2] = -1.  * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8) 
+            MVHM[i][i-1] = -1. * (0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2) 
+            MVHM[i][i] = 1 * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8+ 0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2+ 0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2  + 0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
+            MVHM[i][i+1] =  -1. * (0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2) 
+            MVHM[i][i+2] = -1. * (0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
 
 
     MVHM[n-2][n-1] = -8. * f
@@ -403,7 +413,7 @@ for i in range(4,8):
     uVHM = solve(VHM(nodesFull,h,xFull),forceFull(nodesFull,h))
 
     print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
-
+    print('{0:10f}'.format(max(uSlice-uSliceFD)))
     #print(np.array(np.concatenate((xFD[0:nodes],xFD[nodes+1:2*nodes],xFD[2*nodes+1:len(xFD)])))) 
 
     plt.axvline(x=1,c="#536872")
