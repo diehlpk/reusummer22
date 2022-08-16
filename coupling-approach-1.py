@@ -203,13 +203,17 @@ def CouplingFDFD(n,h,x):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
+<<<<<<< HEAD
 c = 0.1
+=======
+c = 0.25
+>>>>>>> 2d3bd46 (Update)
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
 
 def fPD(x,h):
-    E = 1
+    E = 0.9
     if x >= 1.25 and x <= 1.75:
         E = interpolate.splev(x, tck, der=0)
     return E/(h*h)
@@ -405,8 +409,8 @@ for i in range(4,8):
 
     uVHM = solve(VHM(nodesFull,h,xFull),forceFull(nodesFull,h))
 
-    print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
-    print('{0:10f}'.format(max(uSlice-uSliceFD)))
+    #print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
+    print(max(abs(uSlice-uSliceFD)))
     #print(np.array(np.concatenate((xFD[0:nodes],xFD[nodes+1:2*nodes],xFD[2*nodes+1:len(xFD)])))) 
 
     plt.axvline(x=1,c="#536872")
@@ -440,4 +444,5 @@ if has_condition :
     file = "con_neumann_"+ str(c) + ".csv"
     # print(file)
     np.savetxt(file, con, delimiter=",")
+
 
