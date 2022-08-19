@@ -114,7 +114,7 @@ def FDM(n,h):
 # Assemble the stiffness matrix for the coupling of FDM - FDM - FDM
 #############################################################################
 
-def CouplingFDFD(n,h):
+def CouplingFDFD(n,h,x):
 
     M = np.zeros([3*n,3*n])
 
@@ -163,15 +163,13 @@ def CouplingFDFD(n,h):
 
     M[3*n-1][3*n-1] = 1
     
-    #M *= 1./(2.*h*h)
-    
     return M
 
 #############################################################################
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.5
+c = 0.9
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
@@ -180,7 +178,7 @@ def fPD(x,h):
     E = 1
     if x >= 1.25 and x <= 1.75:
         E = interpolate.splev(x, tck, der=0)
-    #print(E)
+    
     return E/(h*h)
 
 def Coupling(n,h,x):
@@ -188,7 +186,7 @@ def Coupling(n,h,x):
     M = np.zeros([3*n+4,3*n+4])
 
     fFD =  1./(2.*h*h)
-    # fPD =  1./(8.*h*h)
+    f =  1./(8.*h*h)
 
     # Boundary
 
@@ -215,11 +213,25 @@ def Coupling(n,h,x):
     # PD
 
     for i in range(n+2,2*n+2):
-        M[i][i-2] = -1.  * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8) 
-        M[i][i-1] = -1. * (0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2) 
-        M[i][i] = 1 * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8+ 0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2+ 0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2  + 0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
-        M[i][i+1] =  -1. * (0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2) 
-        M[i][i+2] = -1. * (0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
+        if x[i] < 1.25 :
+            M[i][i-2] = -1. * f
+            M[i][i-1] = -4. * f
+            M[i][i] = 10. * f
+            M[i][i+1] = -4. * f
+            M[i][i+2] = -1. * f
+        elif x[i] > 1.75:
+            M[i][i-2] = -1. * f
+            M[i][i-1] = -4. * f
+            M[i][i] = 10. * f
+            M[i][i+1] = -4. * f
+            M[i][i+2] = -1. * f
+        #print(x[i])
+        else:
+            M[i][i-2] = -1.  * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8) 
+            M[i][i-1] = -1. * (0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2) 
+            M[i][i] = 1 * (0.5*(fPD(x[i-2],h)+fPD(x[i],h))/8+ 0.5*(fPD(x[i-1],h)+fPD(x[i],h))/2+ 0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2  + 0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
+            M[i][i+1] =  -1. * (0.5*(fPD(x[i+1],h)+fPD(x[i],h))/2) 
+            M[i][i+2] = -1. * (0.5*(fPD(x[i+2],h)+fPD(x[i],h))/8) 
 
     # Overlap
 
@@ -327,7 +339,7 @@ for i in range(4,8):
     forceCoupledFD[2*nodes] = 0
 
     uFDMVHM = solve(Coupling(nodes,h,x),forceCoupled)
-    uFD = solve(CouplingFDFD(nodes,h),forceCoupledFD)
+    uFD = solve(CouplingFDFD(nodes,h,xFD),forceCoupledFD)
     uFDFull = solve(FDM(nodesFull,h),forceFull(nodesFull,h))
 
     uSlice = np.array(np.concatenate((uFDMVHM[0:nodes],uFDMVHM[nodes+3:2*nodes+2],uFDMVHM[2*nodes+5:len(x)])))
@@ -336,7 +348,7 @@ for i in range(4,8):
     uVHM = solve(VHM(nodesFull,h,xFull),forceFull(nodesFull,h))
 
     print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
-
+    print(max(abs(uSlice-uSliceFD)))
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
 
