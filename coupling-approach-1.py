@@ -203,7 +203,7 @@ def CouplingFDFD(n,h,x):
 # Assemble the stiffness matrix for the coupling of FDM - Displacement - FDM 
 #############################################################################
 
-c = 0.5
+c = 0.1
 x = [1.25,(1.5+1.25)/2,1.5,(1.5+1.75)/2,1.75]
 y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
@@ -437,7 +437,7 @@ plt.xlabel("$x$")
 plt.savefig("coupling-"+example.lower()+"-approach-1.pdf",bbox_inches='tight')
 
 if has_condition :
-    file = "con_mdcm_d-cubic-matching.csv" # + str(c) + ".csv"
+    file = "con_neumann_"+ str(c) + ".csv"
     # print(file)
     np.savetxt(file, con, delimiter=",")
 

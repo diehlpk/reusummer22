@@ -5,27 +5,17 @@ pgf_with_latex = {"text.usetex": True, "font.size" : 12, "pgf.preamble" : [r'\us
 
 # Mixed 
 
-con_vhcm_n = np.genfromtxt('con_mdcm_d-cubic-matching.csv',delimiter=',')
-# con_mscm_n = np.genfromtxt('con_mscm_n-damage.csv',delimiter=',')
-# con_mdcm_n = np.genfromtxt('con_mdcm_n-damage.csv',delimiter=',')
+c = [0.1,0.25,0.75,0.9]
 
-#con_vhcm_n_y = np.genfromtxt('con_mdcm_d-cubic-matching_0.8.csv',delimiter=',')
-#con_vhcm_n_z = np.genfromtxt('con_mdcm_d-cubic-matching_0.7.csv',delimiter=',')
-# con_vhcm_n_w = np.genfromtxt('con_mdcm_d-cubic-matching_0.5.csv',delimiter=',')
+x = np.linspace(0,1,len(c))
+markers = ['s','o','x','.']
+print(x)
 
-x = np.linspace(0,1,len(con_vhcm_n))
-
-# y = np.linspace(0,1,len(con_vhcm_n_y))
-# z = np.linspace(0,1,len(con_vhcm_n_z))
-# w = np.linspace(0,1,len(con_vhcm_n_w))
-
-# plt.plot(x,con_mdcm_n,label="MDCM",c="black",marker="s")
-# plt.plot(x,con_mscm_n,label="MSCM",c="black",marker="o")
-plt.plot(x,con_vhcm_n,label="VHCM",c="black",marker="x")
-
-#plt.plot(y,con_vhcm_n_y,label="VHCM 0.8",c="red",marker="x")
-#plt.plot(z,con_vhcm_n_z,label="VHCM 0.7",c="blue",marker="x")
-# plt.plot(w,con_vhcm_n_w,label="VHCM 0.7",c="green",marker="x")
+i = 0
+for value in c:
+    con = np.genfromtxt("con_neumann_"+str(value)+".csv",delimiter=',')
+    plt.plot(x,con,label=str(value),c="black",marker=markers[i])
+    i += 1
 
 plt.grid()
 plt.xlabel("$\delta$")
