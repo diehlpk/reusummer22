@@ -255,6 +255,9 @@ def Coupling(n,h,x):
 
     M[3*n+3][3*n+3] = 1
 
+    if has_condition:
+        con.append(np.linalg.cond(M))
+
     return M
 
 def VHM(n,h,x):
@@ -348,7 +351,7 @@ for i in range(4,8):
     uVHM = solve(VHM(nodesFull,h,xFull),forceFull(nodesFull,h))
 
     print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
-    print(max(abs(uSlice-uSliceFD)))
+    print('{0:10f}'.format(max(abs(uSlice-uSliceFD))))
     plt.axvline(x=1,c="#536872")
     plt.axvline(x=2,c="#536872")
 
@@ -377,6 +380,6 @@ plt.xlabel("$x$")
 plt.savefig("coupling-"+example.lower()+"-approach-1-direchlet.pdf",bbox_inches='tight')
 
 if has_condition :
-    file = "con_mdcm_d-cubic-matching_" + str(c) + ".csv"
+    file = "con_d_"+ str(c) + ".csv"
     print(file)
     np.savetxt(file, con, delimiter=",")
