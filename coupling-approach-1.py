@@ -38,17 +38,17 @@ def f(x):
     global g 
 
     if example == "Cubic":
-        g = 1
-        return -2*x /9
+        g = 3/27*3*3
+        return -6/27*x
     elif example == "Quartic":
-        g = 1
-        return -12 *x*x
+        g = 4/81 * 3 * 3 * 3
+        return -12/81 * x*x
     elif example == "Quadratic":
-        g = 1
+        g = 6/9
         return -2/9
     elif example == "Linear":
-        g = 1
-        return 0.1
+        g = 1/3
+        return 0
     elif example == "Linear-cubic":
         g = 31./4.
         if x < 1.5:
@@ -99,13 +99,13 @@ def forceCouplingFD(n,x):
 def exactSolution(x):
     
     if example == "Cubic":
-        return x * x * x
+        return 1/27 * x * x * x
     elif example == "Quartic":
-        return x * x * x * x
+        return x * x * x * x / 81
     elif example == "Quadratic":
-        return x * x
+        return 1/9 * x * x
     elif example == "Linear":
-        return x
+        return x/3
     elif example == "Linear-cubic":
         return np.where(x < 1.5, x, x + (x-1.5) * (x-1.5) * (x-1.5) )
     else:
@@ -195,7 +195,7 @@ def CouplingFDFD(n,h,x):
 
     #M *= 1./(2.*h*h)
 
-    np.savetxt("foo.csv", M, delimiter=",")
+    #np.savetxt("foo.csv", M, delimiter=",")
     
     return M
 
@@ -209,7 +209,7 @@ y = [1,(1+c)/2,c,(1+c)/2,1]
 tck = interpolate.splrep(x, y, s=0)
 
 def fPD(x,h):
-    E = 0.9
+    E = 1
     if x >= 1.25 and x <= 1.75:
         E = interpolate.splev(x, tck, der=0)
     return E/(h*h)
@@ -414,8 +414,8 @@ for i in range(4,8):
     
     if example == "Quartic" or example == "Linear-cubic" or example =="Linear" or example == "Cubic" or example == "Quadratic":
         
-        plt.plot(xFull,uSlice-uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
-        #plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
+        plt.plot(xFull,uSlice,label=r"$\delta$=1/"+str(int(n/2))+"",c="black",marker=markers[i-4],markevery=n)
+        plt.plot(xFull,uSliceFD,label=r"$\delta$=1/"+str(int(n/2))+"",c="red",marker=markers[i-8],markevery=n)
         plt.ylabel("Error in displacement w.r.t. FDM")
         plt.ylabel("Error in displacement w.r.t. FDM")
 

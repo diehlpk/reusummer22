@@ -278,7 +278,7 @@ def VHM(n,h,x):
             MVHM[i][i] = 10. * f
             MVHM[i][i+1] = -4. * f
             MVHM[i][i+2] = -1. * f
-        elif x[i] > 1.25:
+        elif x[i] > 1.75:
             MVHM[i][i-2] = -1. * f
             MVHM[i][i-1] = -4. * f
             MVHM[i][i] = 10. * f
