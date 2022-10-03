@@ -406,7 +406,7 @@ for i in range(4,8):
     uVHM = solve(VHM(nodesFull,h,xFull),forceFull(nodesFull,h))
 
     #print(max(uSlice),max(uSliceFD),max(uFDFull),max(uVHM))
-    print(max(abs(uSlice-uSliceFD)))
+    print('{:.10f}'.format(max(abs(uSlice-uSliceFD))))
     #print(np.array(np.concatenate((xFD[0:nodes],xFD[nodes+1:2*nodes],xFD[2*nodes+1:len(xFD)])))) 
 
     plt.axvline(x=1,c="#536872")
