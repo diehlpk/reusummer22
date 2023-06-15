@@ -1,6 +1,6 @@
-# Challenges for coupling approaches for classical linear elasticity and bond-based peridynamic models for non-uniform meshes and damage
+# Coupling approaches with non-matching grids for classical linear elasticity and bond-based  peridynamic models in 1D - Part II
 
-Scripts to comapre the simulations including damage. 
+Scripts to compare the simulations, including damage. 
 
 ## Dependencies
 
